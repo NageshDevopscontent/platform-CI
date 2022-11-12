@@ -1,0 +1,45 @@
+multibranchPipelineJob('nev/arender-nuxeo') {
+  // Description
+  description('ARender Nuxeo Connector')
+  // Branch Sources
+  branchSources {
+    branchSource {
+      source {
+        // GitHub
+        github {
+          id('nev/arender-nuxeo')
+          // Credentials
+          credentialsId('github-app')
+          // Repository
+          repoOwner('nuxeo')
+          repository('arender-nuxeo')
+          repositoryUrl('https://github.com/nuxeo/arender-nuxeo')
+          configuredByUrl(false)
+          // Behaviors
+          traits {
+            {{- .Values.jobs.traits.gitHubBranchDiscovery | nindent 12 }}
+            {{- .Values.jobs.traits.gitHubPullRequestDiscovery | nindent 12 }}
+            {{- .Values.jobs.traits.disableStatusUpdateTrait | nindent 12 }}
+            // Filter by name (with regular expression)
+            headRegexFilter {
+              // Regular expression
+              regex('main|\\d*.?\\d+|PR-.*')
+            }
+            gitLFSPullTrait()
+          }
+        }
+      }
+      {{- .Values.jobs.strategy | nindent 6 }}
+    }
+  }
+  // Build Configuration
+  factory {
+    // Mode: by Jenkinsfile
+    workflowBranchProjectFactory {
+      // Script Path
+      scriptPath('ci/Jenkinsfiles/build.groovy')
+    }
+  }
+  {{- .Values.jobs.triggers | nindent 2 }}
+  {{- .Values.jobs.orphanedItemStrategy | nindent 2 }}
+}

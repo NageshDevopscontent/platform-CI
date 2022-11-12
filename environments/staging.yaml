@@ -1,0 +1,68 @@
+namespace: platform-staging
+dryrun: true
+datadog:
+  enabled: false
+docker:
+  registry: docker.platform-staging.dev.nuxeo.com
+github:
+  credentialsId: ""
+jira:
+  url: https://jira-preprod.nuxeo.com/
+jobs:
+  strategy: |-
+    // Property strategy
+    strategy {
+      // All branches get the same properties
+      allBranchesSame {
+        props {
+          // Suppress automatic SCM triggering
+          suppressAutomaticTriggering()
+        }
+      }
+    }
+  triggers: |-
+    // Scan Repository Triggers
+    triggers {
+    }
+  cleanupExports:
+    triggers: |-
+      pipelineTriggers {
+        // Build Triggers
+        triggers {
+        }
+      }
+  benchmarkNuxeoLTS:
+    triggers: |-
+      pipelineTriggers {
+        // Build Triggers
+        triggers {
+        }
+      }
+  mirrorNuxeoLTS:
+    triggers: |-
+      pipelineTriggers {
+        // Build Triggers
+        triggers {
+        }
+      }
+  serverWebUIIntegrationTests:
+    triggers: |-
+      pipelineTriggers {
+        // Build Triggers
+        triggers {
+        }
+      }
+  properties:
+    buildDiscarder: |-
+      buildDiscarder {
+        strategy {
+          logRotator {
+            daysToKeepStr('7')
+            numToKeepStr('3')
+            artifactDaysToKeepStr('')
+            artifactNumToKeepStr('3')
+          }
+        }
+      }
+# Don't run in platform-staging namespace to avoid double key rotation
+awsCredentialsRotation: false

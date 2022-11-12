@@ -1,0 +1,65 @@
+repositories:
+- name: datadog
+  url: https://helm.datadoghq.com
+- name: jenkins
+  url: https://charts.jenkins.io
+
+helmDefaults:
+  atomic: true
+  # Jenkins init container could take among 2 to 4 minutes to apply the configuration
+  # Jenkins' startup probe wait for 3 minutes
+  timeout: 480
+  wait: true
+
+releases:
+- name: jenkins-extra
+  chart: ./charts/jenkins-extra
+  namespace: {{ .Values.namespace }}
+  values:
+  - charts/jenkins-extra/values.yaml.gotmpl
+- name: jenkins
+  chart: jenkins/jenkins
+  version: ~3.3.4
+  namespace: {{ .Values.namespace }}
+  needs:
+  - {{ .Values.namespace }}/jenkins-extra
+  values:
+  - charts/jenkins/values.yaml.gotmpl
+  - charts/jenkins/values-agent.yaml.gotmpl
+  - charts/jenkins/values-casc-credentials.yaml.gotmpl
+  - charts/jenkins/values-casc-jenkins.yaml.gotmpl
+  - charts/jenkins/values-casc-jobs.yaml.gotmpl
+  - charts/jenkins/values-casc-unclassified.yaml.gotmpl
+- name: nexus
+  chart: ./charts/nexus
+  namespace: {{ .Values.namespace }}
+  values:
+    - charts/nexus/values.yaml.gotmpl
+- name: chartmuseum
+  chart: ./charts/chartmuseum
+  namespace: {{ .Values.namespace }}
+  values:
+    - charts/chartmuseum/values.yaml.gotmpl
+- name: aws-credentials
+  chart: ./charts/aws-credentials
+  namespace: {{ .Values.namespace }}
+  values:
+    - charts/aws-credentials/values.yaml.gotmpl
+- name: datadog
+  chart: datadog/datadog
+  version: ~2.37.1
+  condition: datadog.enabled
+  namespace: {{ .Values.namespace }}
+  values:
+  - charts/datadog/values.yaml.gotmpl
+
+environments:
+  # The default environment is used for staging.
+  default:
+    values:
+    - environments/common.yaml
+    - environments/staging.yaml
+  production:
+    values:
+    - environments/common.yaml
+    - environments/production.yaml

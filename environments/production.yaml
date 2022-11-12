@@ -1,0 +1,94 @@
+namespace: platform
+dryrun: false
+datadog:
+  enabled: true
+docker:
+  registry: docker.platform.dev.nuxeo.com
+github:
+  credentialsId: "github"
+jira:
+  url: https://jira.nuxeo.com/
+jobs:
+  strategy: |-
+    // Property strategy
+    strategy {
+      // All branches get the same properties
+      allBranchesSame {
+      }
+    }
+  triggers: |-
+    // Scan Repository Triggers
+    triggers {
+      // Periodically if not otherwise run
+      periodicFolderTrigger {
+        // Interval
+        interval('1d')
+      }
+    }
+  benchmarkNuxeoLTS:
+    triggers: |-
+      pipelineTriggers {
+        // Build Triggers
+        triggers {
+          // Build periodically
+          parameterizedCron {
+            // Schedule
+            parameterizedSpecification('''
+              H 1 * * 1 % NUXEO_BRANCH=2021 ; NUXEO_DOCKER_IMAGE=docker-private.packages.nuxeo.com/nuxeo/nuxeo-benchmark:2021.x ; INSTALL_NEEDED_PACKAGES=false
+              H 1 * * 1 % NUXEO_BRANCH=2023 ; NUXEO_DOCKER_IMAGE=docker-private.packages.nuxeo.com/nuxeo/nuxeo-benchmark:2023.x ; INSTALL_NEEDED_PACKAGES=false
+            ''')
+          }
+        }
+      }
+  cleanupExports:
+    triggers: |-
+      pipelineTriggers {
+        // Build Triggers
+        triggers {
+          // Build periodically
+          cron {
+            // Schedule
+            spec('H H(8-10) * * *')
+          }
+        }
+      }
+  mirrorNuxeoLTS:
+    triggers: |-
+      pipelineTriggers {
+        // Build Triggers
+        triggers {
+          // Build periodically
+          parameterizedCron {
+            // Schedule
+            parameterizedSpecification('''
+              H 1 * * * % NUXEO_LTS_BRANCH=2021
+              H 1 * * * % NUXEO_LTS_BRANCH=2023
+            ''')
+          }
+        }
+      }
+  serverWebUIIntegrationTests:
+    triggers: |-
+      pipelineTriggers {
+        // Build Triggers
+        triggers {
+          // Build periodically
+          cron {
+            // Schedule
+            spec('H 1 * * *')
+          }
+        }
+      }
+  properties:
+    buildDiscarder: |-
+      buildDiscarder {
+        strategy {
+          logRotator {
+            daysToKeepStr('60')
+            numToKeepStr('60')
+            artifactDaysToKeepStr('')
+            artifactNumToKeepStr('5')
+          }
+        }
+      }
+awsCredentialsRotation: true

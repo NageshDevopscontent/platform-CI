@@ -1,0 +1,3 @@
+name: platform-infra-gcr
+runtime: nodejs
+description: platform gcr

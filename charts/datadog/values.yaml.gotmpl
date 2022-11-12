@@ -1,0 +1,35 @@
+nameOverride: platform
+datadog:
+  apiKeyExistingSecret: datadog-nxio-api
+  tags:
+  - "environment:benchmark"
+  - "staging:dev"
+  - "project:jenkins-platform"
+  logs:
+    # by default the log collection is disabled on all container, see containerCollectAll
+    enabled: true
+  dogstatsd:
+    useHostPort: true
+clusterAgent:
+  nodeSelector:
+    team: platform
+  tolerations:
+  - key: team
+    operator: Equal
+    value: platform
+    effect: NoSchedule
+agents:
+  localService:
+    forceLocalServiceEnabled: true
+  nodeSelector:
+    team: platform
+    usage: benchmark
+  tolerations:
+  - key: team
+    operator: Equal
+    value: platform
+    effect: NoSchedule
+  - key: usage
+    operator: Equal
+    value: benchmark
+    effect: NoSchedule

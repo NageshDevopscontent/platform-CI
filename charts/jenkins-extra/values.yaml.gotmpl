@@ -1,0 +1,63 @@
+configMap:
+  dockerDind:
+    daemon: |-
+      {
+          "insecure-registries": [
+            "docker-registry-default.apps.prod.nuxeo.io",
+            "docker-registry-default.apps.oh.nuxeocloud.com",
+            "docker-registry-default.apps.uk.nuxeocloud.com",
+            "docker-registry-default.apps.va.nuxeocloud.com"
+          ]
+      }
+secret:
+  mavenSettings:
+    labels: {}
+    annotations: {}
+    xmlSettings: |-
+      <settings>
+        <!-- sets the local maven repository outside of the ~/.m2 folder for easier mounting of secrets and repo -->
+        <localRepository>${user.home}/.mvnrepository</localRepository>
+        <!-- lets disable the download progress indicator that fills up logs -->
+        <interactiveMode>false</interactiveMode>
+        <mirrors>
+          <mirror>
+            <id>nexus-internal</id>
+            <mirrorOf>!nuxeo-studio,external:*</mirrorOf>
+            <url>http://nexus/repository/maven-upstream/</url>
+          </mirror>
+        </mirrors>
+        <servers>
+          <server>
+            <id>nexus-internal</id>
+            <username>{{ env "NEXUS_USERNAME" }}</username>
+            <password>{{ env "NEXUS_PASSWORD" }}</password>
+          </server>
+          <server>
+            <id>nexus</id>
+            <username>{{ env "PACKAGES_USERNAME" }}</username>
+            <password>{{ env "PACKAGES_PASSWORD" }}</password>
+          </server>
+          <server>
+            <id>nuxeo-studio</id>
+            <username>{{ env "CONNECT_USERNAME" }}</username>
+            <password>{{ env "CONNECT_PASSWORD" }}</password>
+          </server>
+        </servers>
+        <profiles>
+          <profile>
+            <id>nexus</id>
+            <activation>
+              <activeByDefault>true</activeByDefault>
+            </activation>
+            <properties>
+              <altDeploymentRepository>nexus::default::https://packages.nuxeo.com/repository/maven-team-platform/</altDeploymentRepository>
+            </properties>
+          </profile>
+          <profile>
+            <id>nexus-private</id>
+            <properties>
+              <altDeploymentRepository>nexus::default::https://packages.nuxeo.com/repository/maven-team-platform-private/</altDeploymentRepository>
+            </properties>
+          </profile>
+        </profiles>
+      </settings>
